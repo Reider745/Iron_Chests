@@ -8,7 +8,7 @@ CustomChest.setChestRender(BlockID.silverChest);
 
 let guiSilverChest = CustomChest.createChestGui("Silver Chest", 72);
 
-class SilverChestTE extends ChestTileEntity {
+class SilverChestTE extends GenericIronChestTE {
 	constructor() {
 		super(guiSilverChest);
 	}

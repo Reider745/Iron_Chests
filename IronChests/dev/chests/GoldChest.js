@@ -8,7 +8,7 @@ CustomChest.setChestRender(BlockID.goldChest);
 
 let guiGoldChest = CustomChest.createChestGui("Gold Chest", 81);
 
-class GoldChestTE extends ChestTileEntity {
+class GoldChestTE extends GenericIronChestTE {
 	constructor() {
 		super(guiGoldChest);
 	}

@@ -8,7 +8,7 @@ CustomChest.setChestRender(BlockID.diamondChest);
 
 let guiDiamondChest = CustomChest.createChestGui("Diamond Chest", 108);
 
-class DiamondChestTE extends ChestTileEntity {
+class DiamondChestTE extends GenericIronChestTE {
 	constructor() {
 		super(guiDiamondChest);
 	}

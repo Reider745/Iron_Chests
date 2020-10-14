@@ -1,11 +1,9 @@
-/// <reference path="./ChestAPI.js" />
 /// <reference path="./ChestTileEntity.js" />
 
 Block.createSpecialType({
 	base: 1,
-	destroytime: 2,
+	destroytime: 3,
 	explosionres: 3,
-	translucency: 0,
 	sound: "stone"
 }, "iron_chest");
 
@@ -19,7 +17,7 @@ CustomChest.setChestRender(BlockID.copperChest);
 
 let guiCopperChest = CustomChest.createChestGui("Copper Chest", 45);
 
-class CopperChestTE extends ChestTileEntity {
+class CopperChestTE extends GenericIronChestTE {
 	constructor() {
 		super(guiCopperChest);
 	}

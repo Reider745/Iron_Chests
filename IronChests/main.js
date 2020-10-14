@@ -11,7 +11,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-IMPORT("TileRender");
+IMPORT("CustomChest");
 // Translation
 Translation.addTranslation("Iron Chest", { "cs_CZ": "Železná truhla", "da_DK": "Jern Kiste", "de_DE": "Eisentruhe", "el_GR": "Σιδερένιο Σεντούκι", "es_ES": "Cofre de Hierro", "et_EE": "Raudkirst", "fr_FR": "Coffre en Fer", "ko_KR": "철 상자", "nb_NO": "Jernkiste", "nl_NL": "Ijzeren Kist", "pl_PL": "Żelazna skrzynia", "pt_BR": "Baú de Ferro", "pt_PT": "Baú de Ferro", "ru_RU": "Железный сундук", "sv_SE": "Järnkista", "tr_TR": "Demir Sandık", "zh_CN": "铁箱子", "zh_TW": "鐵箱" });
 Translation.addTranslation("Gold Chest", { "cs_CZ": "Zlatá truhla", "da_DK": "Guld Kiste", "de_DE": "Goldtruhe", "el_GR": "Χρυσό Σεντούκι", "es_ES": "Cofre de Oro", "et_EE": "Kuldkirst", "fr_FR": "Coffre en Or", "ko_KR": "금 상자", "nb_NO": "Gullkiste", "nl_NL": "Gouden Kist", "pl_PL": "Złota skrzynia", "pt_BR": "Baú de Ouro", "pt_PT": "Baú de Ouro", "ru_RU": "Золотой сундук", "sv_SE": "Guldkista", "tr_TR": "Altın Sandık", "zh_CN": "金箱子", "zh_TW": "黃金箱" });
@@ -29,58 +29,12 @@ Translation.addTranslation("Diamond to Crystal Chest Upgrade", { "cs_CZ": "Vylep
 Translation.addTranslation("Wood to Iron Chest Upgrade", { "cs_CZ": "Vylepšení dřevěné truhly na železnou", "da_DK": "Træ til Jern Kiste Opgradering", "de_DE": "Holz-zu-Eisentruhen-Upgrade", "el_GR": "Αναβάθμιση από Ξύλινο σε Σιδερένιο Σεντούκι", "es_ES": "Mejora de Cofre de Madera a Hierro", "et_EE": "Puukirst rauast kirstuks", "fr_FR": "Amélioration de coffre en bois à fer", "ko_KR": "나무 상자를 철 상자로 업그레이드", "nb_NO": "Tre til Jern Kisteoppgradering", "nl_NL": "Houten naar Ijzeren Kist Transformatie", "pl_PL": "Ulepszenie drewnianej skrzyni na żelazną", "pt_BR": "Aprimoramento de Baú de Madeira para Ferro", "pt_PT": "Melhoria de Baú de Madeira para Ferro", "ru_RU": "Улучшение из деревянного в железный сундук", "sv_SE": "Trä till Järn Kistuppgradering", "tr_TR": "Tahta Sandığı Demir Sandığa Yükselt", "zh_CN": "升级：木>铁", "zh_TW": "木箱升級成鐵箱" });
 Translation.addTranslation("Wood to Copper Chest Upgrade", { "cs_CZ": "Vylepšení dřevěné truhly na měděnou", "da_DK": "Træ til Kobber Kiste Opgradering", "de_DE": "Holz-zu-Kupfertruhen-Upgrade", "el_GR": "Αναβάθμιση από Ξύλινο σε Χάλκινο Σεντούκι", "es_ES": "Mejora de Cofre de Madera a Cobre", "et_EE": "Puukirst vasest kirstuks", "fr_FR": "Amélioration de coffre en bois à cuivre", "ko_KR": "나무 상자를 구리 상자로 업그레이드", "nb_NO": "Tre til Kobber Kisteoppgradering", "nl_NL": "Houten naar Koperen Kist Transformatie", "pl_PL": "Ulepszenie drewnianej skrzyni na miedzianą", "pt_BR": "Aprimoramento de Baú de Madeira para Cobre", "pt_PT": "Melhoria de Baú de Madeira para Cobre", "ru_RU": "Улучшение из деревянного в медный сундук", "sv_SE": "Trä till Koppar Kistuppgradering", "tr_TR": "Tahta Sandığı Bakır Sandığa Yükselt", "zh_CN": "升级：木>铜", "zh_TW": "木箱升級成銅箱" });
 Translation.addTranslation("Diamond to Obsidian Chest Upgrade", { "cs_CZ": "Vylepšení diamantové truhly na obsidiánovou", "da_DK": "Diamant til Obsidian Kiste Opgradering", "de_DE": "Diamant-zu-Obsidiantruhen-Upgrade", "el_GR": "Αναβάθμιση από Διαμαντένιο σε Σεντούκι Οψιδιανού", "es_ES": "Mejora de Cofre de Diamante a Obsidiana", "et_EE": "Teemantkirst obsidiaanist kirstuks", "fr_FR": "Amélioration de coffre en diamant à obsidienne", "ko_KR": "다이아몬드 상자를 흑요석 상자로 업그레이드", "nb_NO": "Diamant til Obsidian Kisteoppgradering", "nl_NL": "Diamanten naar Obsidiaanen Kist Transformatie", "pl_PL": "Ulepszenie diamentowej skrzyni na obsydianową", "pt_BR": "Aprimoramento de Baú de Diamante para Obsidiana", "pt_PT": "Melhoria de Baú de Diamante para Obsidiana", "ru_RU": "Улучшение из алмазного в обсидиановый сундук", "sv_SE": "Diamant till Obsidian Kistuppgradering", "tr_TR": "Elmas Sandığı Obsidyen Sandığa Yükselt", "zh_CN": "升级：钻石>黑曜石", "zh_TW": "鑽石箱升級成黑曜石箱" });
-var CustomChest = {
-    setChestRender: function (id) {
-        Block.setShape(id, 1 / 16, 0, 1 / 16, 15 / 16, 14 / 16, 15 / 16);
-        TileRenderer.setStaticModelWithRotation(id, [
-            [1 / 16, 0, 1 / 16, 15 / 16, 14 / 16, 15 / 16],
-            [7 / 16, 7 / 16, 15 / 16, 9 / 16, 11 / 16, 1]
-        ]);
-    },
-    createGuiSlotArray: function (count, inRow, slotSize) {
-        var startX = (1000 - inRow * slotSize) / 2;
-        var elements = {};
-        for (var i = 0; i < count; i++) {
-            var x = i % inRow;
-            var y = Math.floor(i / inRow);
-            elements["slot" + i] = { type: "slot", x: startX + x * slotSize, y: y * slotSize, size: slotSize };
-        }
-        return elements;
-    },
-    createChestGui: function (title, count, inRow, slotSize) {
-        var inRow = inRow || 9;
-        var slotSize = slotSize || 108;
-        return new UI.StandardWindow({
-            standard: {
-                header: { text: { text: Translation.translate(title) } },
-                inventory: { standard: true },
-                background: { standard: true },
-                minHeight: Math.ceil(count / inRow) * slotSize
-            },
-            elements: this.createGuiSlotArray(count, inRow, slotSize)
-        });
+var GenericIronChestTE = /** @class */ (function (_super) {
+    __extends(GenericIronChestTE, _super);
+    function GenericIronChestTE() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-};
-var ChestTileEntity = /** @class */ (function () {
-    function ChestTileEntity(guiScreen) {
-        this.useNetworkItemContainer = true;
-        this.guiScreen = guiScreen;
-    }
-    ChestTileEntity.prototype.getScreenName = function (player, coords) {
-        return "main";
-    };
-    ChestTileEntity.prototype.getScreenByName = function (screenName) {
-        return this.guiScreen;
-    };
-    ChestTileEntity.prototype.getGuiScreen = function (screenName) {
-        return this.guiScreen;
-    };
-    ChestTileEntity.prototype.clearContainer = function () {
-        for (var name in this.container.slots) {
-            this.container.clearSlot(name);
-        }
-    };
-    ChestTileEntity.prototype.upgrade = function (chestID, player) {
+    GenericIronChestTE.prototype.upgrade = function (chestID, player) {
         if (getCoreAPILevel() < 12)
             return;
         var blockData = this.blockSource.getBlockData(this.x, this.y, this.z);
@@ -92,18 +46,13 @@ var ChestTileEntity = /** @class */ (function () {
         tileEntity.container = container;
         Entity.setCarriedItem(player, 0, 0, 0);
     };
-    ChestTileEntity.prototype.tick = function () {
-        // check hoppers
-    };
-    return ChestTileEntity;
-}());
-/// <reference path="./ChestAPI.js" />
+    return GenericIronChestTE;
+}(ChestTileEntity));
 /// <reference path="./ChestTileEntity.js" />
 Block.createSpecialType({
     base: 1,
-    destroytime: 2,
+    destroytime: 3,
     explosionres: 3,
-    translucency: 0,
     sound: "stone"
 }, "iron_chest");
 IDRegistry.genBlockID("copperChest");
@@ -131,7 +80,7 @@ var CopperChestTE = /** @class */ (function (_super) {
         return false;
     };
     return CopperChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.copperChest, new CopperChestTE());
 IDRegistry.genBlockID("ironChest");
 Block.createBlockWithRotation("ironChest", [
@@ -154,7 +103,7 @@ var IronChestTE = /** @class */ (function (_super) {
         return false;
     };
     return IronChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.ironChest, new IronChestTE());
 IDRegistry.genBlockID("silverChest");
 Block.createBlockWithRotation("silverChest", [
@@ -177,7 +126,7 @@ var SilverChestTE = /** @class */ (function (_super) {
         return false;
     };
     return SilverChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.silverChest, new SilverChestTE());
 IDRegistry.genBlockID("goldChest");
 Block.createBlockWithRotation("goldChest", [
@@ -200,7 +149,7 @@ var GoldChestTE = /** @class */ (function (_super) {
         return false;
     };
     return GoldChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.goldChest, new GoldChestTE());
 IDRegistry.genBlockID("diamondChest");
 Block.createBlockWithRotation("diamondChest", [
@@ -227,12 +176,17 @@ var DiamondChestTE = /** @class */ (function (_super) {
         return false;
     };
     return DiamondChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.diamondChest, new DiamondChestTE());
 IDRegistry.genBlockID("obsidianChest");
 Block.createBlockWithRotation("obsidianChest", [
     { name: "Obsidian Chest", texture: [["obsidian_chest", 0], ["obsidian_chest", 0], ["obsidian_chest", 2], ["obsidian_chest", 1], ["obsidian_chest", 2], ["obsidian_chest", 2]], inCreative: true }
-], "stone");
+], {
+    base: 1,
+    destroytime: 3,
+    explosionres: 10000,
+    sound: "stone"
+});
 ToolAPI.registerBlockMaterial(BlockID.obsidianChest, "stone", 1, true);
 Block.setDestroyLevel(BlockID.obsidianChest, 1);
 CustomChest.setChestRender(BlockID.obsidianChest);
@@ -243,7 +197,7 @@ var ObsidianChestTE = /** @class */ (function (_super) {
         return _super.call(this, guiObsidianChest) || this;
     }
     return ObsidianChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.obsidianChest, new ObsidianChestTE());
 IDRegistry.genBlockID("crystalChest");
 Block.createBlockWithRotation("crystalChest", [
@@ -259,7 +213,7 @@ var CrystalChestTE = /** @class */ (function (_super) {
         return _super.call(this, guiCrystalChest) || this;
     }
     return CrystalChestTE;
-}(ChestTileEntity));
+}(GenericIronChestTE));
 TileEntity.registerPrototype(BlockID.crystalChest, new CrystalChestTE());
 IDRegistry.genItemID("woodCopperUpgrade");
 Item.createItem("woodCopperUpgrade", "Wood to Copper Chest Upgrade", { name: "wood_copper_upgrade" }, { stack: 1 });
@@ -437,3 +391,5 @@ Callback.addCallback("PreLoaded", function () {
         "xxx"
     ], ['x', 49, -1, 'a', 20, -1]);
 });
+ModAPI.registerAPI("IronChest", CustomChest);
+Logger.Log("CustomChest API shared with name IronChest.", "API");

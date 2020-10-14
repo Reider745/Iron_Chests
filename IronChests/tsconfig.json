@@ -12,7 +12,7 @@
   ],
   "include": [
     "../../IC_Libraries/declarations/core-engine.d.ts",
-    "../../IC_Libraries/declarations/TileRender.d.ts"
+    "../../IC_Libraries/declarations/CustomChest.d.ts"
   ],
   "files": [
     "dev/header.js",
