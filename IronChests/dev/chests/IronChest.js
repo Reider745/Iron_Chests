@@ -1,0 +1,25 @@
+IDRegistry.genBlockID("ironChest");
+Block.createBlockWithRotation("ironChest", [
+	{name: "Iron Chest", texture: [["iron_chest", 0], ["iron_chest", 0], ["iron_chest", 2], ["iron_chest", 1], ["iron_chest", 2], ["iron_chest", 2]], inCreative: true}
+], "iron_chest");
+ToolAPI.registerBlockMaterial(BlockID.ironChest, "stone", 1, true);
+Block.setDestroyLevel(BlockID.ironChest, 1);
+CustomChest.setChestRender(BlockID.ironChest);
+
+let guiIronChest = CustomChest.createChestGui("Iron Chest", 54);
+
+class IronChestTE extends ChestTileEntity {
+	constructor() {
+		super(guiIronChest);
+	}
+
+	click(id, count, data, coords, player, extra) {
+		if (id == ItemID.ironGoldUpgrade) {
+			this.upgrade(BlockID.goldChest, player);
+			return true;
+		}
+		return false;
+	}
+}
+
+TileEntity.registerPrototype(BlockID.ironChest, new IronChestTE());

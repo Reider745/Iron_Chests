@@ -1,0 +1,17 @@
+IDRegistry.genBlockID("obsidianChest");
+Block.createBlockWithRotation("obsidianChest", [
+	{name: "Obsidian Chest", texture: [["obsidian_chest", 0], ["obsidian_chest", 0], ["obsidian_chest", 2], ["obsidian_chest", 1], ["obsidian_chest", 2], ["obsidian_chest", 2]], inCreative: true}
+], "stone");
+ToolAPI.registerBlockMaterial(BlockID.obsidianChest, "stone", 1, true);
+Block.setDestroyLevel(BlockID.obsidianChest, 1);
+CustomChest.setChestRender(BlockID.obsidianChest);
+
+let guiObsidianChest = CustomChest.createChestGui("Obsidian Chest", 108);
+
+class ObsidianChestTE extends ChestTileEntity {
+	constructor() {
+		super(guiObsidianChest);
+	}
+}
+
+TileEntity.registerPrototype(BlockID.obsidianChest, new ObsidianChestTE());

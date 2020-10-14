@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "target": "ES5",
+    "lib": ["ESNext"],
+    "outFile": "main.js",
+    "allowJs": true,
+    "checkJs": false,
+  },
+  "exclude": [
+    "typedoc",
+    "dom"
+  ],
+  "include": [
+    "../../IC_Libraries/declarations/core-engine.d.ts",
+    "../../IC_Libraries/declarations/TileRender.d.ts"
+  ],
+  "files": [
+    "dev/header.js",
+    "dev/chests/CopperChest.js",
+    "dev/chests/IronChest.js",
+    "dev/chests/SilverChest.js",
+    "dev/chests/GoldChest.js",
+    "dev/chests/DiamondChest.js",
+    "dev/chests/ObsidianChest.js",
+    "dev/chests/CrystalChest.js",
+    "dev/upgrades.js",
+    "dev/recipes.js"
+  ]
+}
