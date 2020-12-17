@@ -11,10 +11,6 @@
     "dom"
   ],
   "include": [
-    "../../IC_Libraries/declarations/core-engine.d.ts",
-    "../../IC_Libraries/declarations/CustomChest.d.ts"
-  ],
-  "files": [
     "dev/header.js",
     "dev/chests/CopperChest.js",
     "dev/chests/IronChest.js",
@@ -25,5 +21,8 @@
     "dev/chests/CrystalChest.js",
     "dev/upgrades.js",
     "dev/recipes.js"
+  ],
+  "files": [
+    "../global.d.ts"
   ]
 }

@@ -12,12 +12,12 @@ Block.createBlockWithRotation("copperChest", [
 	{name: "Copper Chest", texture: [["copper_chest", 0], ["copper_chest", 0], ["copper_chest", 2], ["copper_chest", 1], ["copper_chest", 2], ["copper_chest", 2]], inCreative: true}
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.copperChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.copperChest, 1);
+Block.setDestroyLevel(BlockID.copperChest, 1, true);
 CustomChest.setChestRender(BlockID.copperChest);
 
 let guiCopperChest = CustomChest.createChestGui("Copper Chest", 45);
 
-class CopperChestTE extends GenericIronChestTE {
+class CopperChestTE extends AdvancedChestTE {
 	constructor() {
 		super(guiCopperChest);
 	}
@@ -36,3 +36,12 @@ class CopperChestTE extends GenericIronChestTE {
 }
 
 TileEntity.registerPrototype(BlockID.copperChest, new CopperChestTE());
+
+StorageInterface.createInterface(BlockID.copperChest, {
+	slots: {
+		"slot^0-44": {
+			input: true,
+			output: true
+		}
+	}
+});

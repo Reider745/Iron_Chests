@@ -57,14 +57,12 @@ function upgradeChest(x, y, z, player) {
 	Entity.setCarriedItem(player, 0, 0, 0);
 }
 
-if (getCoreAPILevel() >= 12) {
-	Callback.addCallback("ItemUseLocalServer", function(coords, item, block) {
-		if (block.id == 54 && (item.id == ItemID.woodCopperUpgrade || item.id == ItemID.woodIronUpgrade)) { 
-			Network.sendToServer("IronChests.upgrade_wood_chest", {x: coords.x, y: coords.y, z: coords.z});
-		}
-	});
+Callback.addCallback("ItemUseLocal", function(coords, item, block, player) {
+	if (block.id == 54 && (item.id == ItemID.woodCopperUpgrade || item.id == ItemID.woodIronUpgrade)) {
+		Network.sendToServer("IronChests.upgrade_wood_chest", {x: coords.x, y: coords.y, z: coords.z});
+	}
+});
 
-	Network.addServerPacket("IronChests.upgrade_wood_chest", function(client, data) {
-		upgradeChest(data.x, data.y, data.z, client.getPlayerUid());
-	});
-}
+Network.addServerPacket("IronChests.upgrade_wood_chest", function(client, data) {
+	upgradeChest(data.x, data.y, data.z, client.getPlayerUid());
+});

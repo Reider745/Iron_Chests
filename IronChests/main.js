@@ -12,6 +12,7 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 IMPORT("CustomChest");
+IMPORT("StorageInterface");
 // Translation
 Translation.addTranslation("Iron Chest", { "cs_CZ": "Železná truhla", "da_DK": "Jern Kiste", "de_DE": "Eisentruhe", "el_GR": "Σιδερένιο Σεντούκι", "es_ES": "Cofre de Hierro", "et_EE": "Raudkirst", "fr_FR": "Coffre en Fer", "ko_KR": "철 상자", "nb_NO": "Jernkiste", "nl_NL": "Ijzeren Kist", "pl_PL": "Żelazna skrzynia", "pt_BR": "Baú de Ferro", "pt_PT": "Baú de Ferro", "ru_RU": "Железный сундук", "sv_SE": "Järnkista", "tr_TR": "Demir Sandık", "zh_CN": "铁箱子", "zh_TW": "鐵箱" });
 Translation.addTranslation("Gold Chest", { "cs_CZ": "Zlatá truhla", "da_DK": "Guld Kiste", "de_DE": "Goldtruhe", "el_GR": "Χρυσό Σεντούκι", "es_ES": "Cofre de Oro", "et_EE": "Kuldkirst", "fr_FR": "Coffre en Or", "ko_KR": "금 상자", "nb_NO": "Gullkiste", "nl_NL": "Gouden Kist", "pl_PL": "Złota skrzynia", "pt_BR": "Baú de Ouro", "pt_PT": "Baú de Ouro", "ru_RU": "Золотой сундук", "sv_SE": "Guldkista", "tr_TR": "Altın Sandık", "zh_CN": "金箱子", "zh_TW": "黃金箱" });
@@ -29,14 +30,12 @@ Translation.addTranslation("Diamond to Crystal Chest Upgrade", { "cs_CZ": "Vylep
 Translation.addTranslation("Wood to Iron Chest Upgrade", { "cs_CZ": "Vylepšení dřevěné truhly na železnou", "da_DK": "Træ til Jern Kiste Opgradering", "de_DE": "Holz-zu-Eisentruhen-Upgrade", "el_GR": "Αναβάθμιση από Ξύλινο σε Σιδερένιο Σεντούκι", "es_ES": "Mejora de Cofre de Madera a Hierro", "et_EE": "Puukirst rauast kirstuks", "fr_FR": "Amélioration de coffre en bois à fer", "ko_KR": "나무 상자를 철 상자로 업그레이드", "nb_NO": "Tre til Jern Kisteoppgradering", "nl_NL": "Houten naar Ijzeren Kist Transformatie", "pl_PL": "Ulepszenie drewnianej skrzyni na żelazną", "pt_BR": "Aprimoramento de Baú de Madeira para Ferro", "pt_PT": "Melhoria de Baú de Madeira para Ferro", "ru_RU": "Улучшение из деревянного в железный сундук", "sv_SE": "Trä till Järn Kistuppgradering", "tr_TR": "Tahta Sandığı Demir Sandığa Yükselt", "zh_CN": "升级：木>铁", "zh_TW": "木箱升級成鐵箱" });
 Translation.addTranslation("Wood to Copper Chest Upgrade", { "cs_CZ": "Vylepšení dřevěné truhly na měděnou", "da_DK": "Træ til Kobber Kiste Opgradering", "de_DE": "Holz-zu-Kupfertruhen-Upgrade", "el_GR": "Αναβάθμιση από Ξύλινο σε Χάλκινο Σεντούκι", "es_ES": "Mejora de Cofre de Madera a Cobre", "et_EE": "Puukirst vasest kirstuks", "fr_FR": "Amélioration de coffre en bois à cuivre", "ko_KR": "나무 상자를 구리 상자로 업그레이드", "nb_NO": "Tre til Kobber Kisteoppgradering", "nl_NL": "Houten naar Koperen Kist Transformatie", "pl_PL": "Ulepszenie drewnianej skrzyni na miedzianą", "pt_BR": "Aprimoramento de Baú de Madeira para Cobre", "pt_PT": "Melhoria de Baú de Madeira para Cobre", "ru_RU": "Улучшение из деревянного в медный сундук", "sv_SE": "Trä till Koppar Kistuppgradering", "tr_TR": "Tahta Sandığı Bakır Sandığa Yükselt", "zh_CN": "升级：木>铜", "zh_TW": "木箱升級成銅箱" });
 Translation.addTranslation("Diamond to Obsidian Chest Upgrade", { "cs_CZ": "Vylepšení diamantové truhly na obsidiánovou", "da_DK": "Diamant til Obsidian Kiste Opgradering", "de_DE": "Diamant-zu-Obsidiantruhen-Upgrade", "el_GR": "Αναβάθμιση από Διαμαντένιο σε Σεντούκι Οψιδιανού", "es_ES": "Mejora de Cofre de Diamante a Obsidiana", "et_EE": "Teemantkirst obsidiaanist kirstuks", "fr_FR": "Amélioration de coffre en diamant à obsidienne", "ko_KR": "다이아몬드 상자를 흑요석 상자로 업그레이드", "nb_NO": "Diamant til Obsidian Kisteoppgradering", "nl_NL": "Diamanten naar Obsidiaanen Kist Transformatie", "pl_PL": "Ulepszenie diamentowej skrzyni na obsydianową", "pt_BR": "Aprimoramento de Baú de Diamante para Obsidiana", "pt_PT": "Melhoria de Baú de Diamante para Obsidiana", "ru_RU": "Улучшение из алмазного в обсидиановый сундук", "sv_SE": "Diamant till Obsidian Kistuppgradering", "tr_TR": "Elmas Sandığı Obsidyen Sandığa Yükselt", "zh_CN": "升级：钻石>黑曜石", "zh_TW": "鑽石箱升級成黑曜石箱" });
-var GenericIronChestTE = /** @class */ (function (_super) {
-    __extends(GenericIronChestTE, _super);
-    function GenericIronChestTE() {
+var AdvancedChestTE = /** @class */ (function (_super) {
+    __extends(AdvancedChestTE, _super);
+    function AdvancedChestTE() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    GenericIronChestTE.prototype.upgrade = function (chestID, player) {
-        if (getCoreAPILevel() < 12)
-            return;
+    AdvancedChestTE.prototype.upgrade = function (chestID, player) {
         var blockData = this.blockSource.getBlockData(this.x, this.y, this.z);
         this.blockSource.setBlock(this.x, this.y, this.z, chestID, blockData);
         var container = new ItemContainer(this.container.asLegacyContainer());
@@ -46,7 +45,10 @@ var GenericIronChestTE = /** @class */ (function (_super) {
         tileEntity.container = container;
         Entity.setCarriedItem(player, 0, 0, 0);
     };
-    return GenericIronChestTE;
+    AdvancedChestTE.prototype.tick = function () {
+        StorageInterface.checkHoppers(this);
+    };
+    return AdvancedChestTE;
 }(ChestTileEntity));
 /// <reference path="./ChestTileEntity.js" />
 Block.createSpecialType({
@@ -60,7 +62,7 @@ Block.createBlockWithRotation("copperChest", [
     { name: "Copper Chest", texture: [["copper_chest", 0], ["copper_chest", 0], ["copper_chest", 2], ["copper_chest", 1], ["copper_chest", 2], ["copper_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.copperChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.copperChest, 1);
+Block.setDestroyLevel(BlockID.copperChest, 1, true);
 CustomChest.setChestRender(BlockID.copperChest);
 var guiCopperChest = CustomChest.createChestGui("Copper Chest", 45);
 var CopperChestTE = /** @class */ (function (_super) {
@@ -80,14 +82,22 @@ var CopperChestTE = /** @class */ (function (_super) {
         return false;
     };
     return CopperChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.copperChest, new CopperChestTE());
+StorageInterface.createInterface(BlockID.copperChest, {
+    slots: {
+        "slot^0-44": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("ironChest");
 Block.createBlockWithRotation("ironChest", [
     { name: "Iron Chest", texture: [["iron_chest", 0], ["iron_chest", 0], ["iron_chest", 2], ["iron_chest", 1], ["iron_chest", 2], ["iron_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.ironChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.ironChest, 1);
+Block.setDestroyLevel(BlockID.ironChest, 1, true);
 CustomChest.setChestRender(BlockID.ironChest);
 var guiIronChest = CustomChest.createChestGui("Iron Chest", 54);
 var IronChestTE = /** @class */ (function (_super) {
@@ -103,14 +113,22 @@ var IronChestTE = /** @class */ (function (_super) {
         return false;
     };
     return IronChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.ironChest, new IronChestTE());
+StorageInterface.createInterface(BlockID.ironChest, {
+    slots: {
+        "slot^0-53": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("silverChest");
 Block.createBlockWithRotation("silverChest", [
     { name: "Silver Chest", texture: [["silver_chest", 0], ["silver_chest", 0], ["silver_chest", 2], ["silver_chest", 1], ["silver_chest", 2], ["silver_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.silverChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.silverChest, 1);
+Block.setDestroyLevel(BlockID.silverChest, 1, true);
 CustomChest.setChestRender(BlockID.silverChest);
 var guiSilverChest = CustomChest.createChestGui("Silver Chest", 72);
 var SilverChestTE = /** @class */ (function (_super) {
@@ -126,14 +144,22 @@ var SilverChestTE = /** @class */ (function (_super) {
         return false;
     };
     return SilverChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.silverChest, new SilverChestTE());
+StorageInterface.createInterface(BlockID.silverChest, {
+    slots: {
+        "slot^0-71": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("goldChest");
 Block.createBlockWithRotation("goldChest", [
     { name: "Gold Chest", texture: [["gold_chest", 0], ["gold_chest", 0], ["gold_chest", 2], ["gold_chest", 1], ["gold_chest", 2], ["gold_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.goldChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.goldChest, 1);
+Block.setDestroyLevel(BlockID.goldChest, 1, true);
 CustomChest.setChestRender(BlockID.goldChest);
 var guiGoldChest = CustomChest.createChestGui("Gold Chest", 81);
 var GoldChestTE = /** @class */ (function (_super) {
@@ -149,14 +175,22 @@ var GoldChestTE = /** @class */ (function (_super) {
         return false;
     };
     return GoldChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.goldChest, new GoldChestTE());
+StorageInterface.createInterface(BlockID.goldChest, {
+    slots: {
+        "slot^0-80": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("diamondChest");
 Block.createBlockWithRotation("diamondChest", [
     { name: "Diamond Chest", texture: [["diamond_chest", 0], ["diamond_chest", 0], ["diamond_chest", 2], ["diamond_chest", 1], ["diamond_chest", 2], ["diamond_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.diamondChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.diamondChest, 1);
+Block.setDestroyLevel(BlockID.diamondChest, 1, true);
 CustomChest.setChestRender(BlockID.diamondChest);
 var guiDiamondChest = CustomChest.createChestGui("Diamond Chest", 108);
 var DiamondChestTE = /** @class */ (function (_super) {
@@ -176,8 +210,16 @@ var DiamondChestTE = /** @class */ (function (_super) {
         return false;
     };
     return DiamondChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.diamondChest, new DiamondChestTE());
+StorageInterface.createInterface(BlockID.diamondChest, {
+    slots: {
+        "slot^0-107": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("obsidianChest");
 Block.createBlockWithRotation("obsidianChest", [
     { name: "Obsidian Chest", texture: [["obsidian_chest", 0], ["obsidian_chest", 0], ["obsidian_chest", 2], ["obsidian_chest", 1], ["obsidian_chest", 2], ["obsidian_chest", 2]], inCreative: true }
@@ -188,7 +230,7 @@ Block.createBlockWithRotation("obsidianChest", [
     sound: "stone"
 });
 ToolAPI.registerBlockMaterial(BlockID.obsidianChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.obsidianChest, 1);
+Block.setDestroyLevel(BlockID.obsidianChest, 1, true);
 CustomChest.setChestRender(BlockID.obsidianChest);
 var guiObsidianChest = CustomChest.createChestGui("Obsidian Chest", 108);
 var ObsidianChestTE = /** @class */ (function (_super) {
@@ -197,14 +239,22 @@ var ObsidianChestTE = /** @class */ (function (_super) {
         return _super.call(this, guiObsidianChest) || this;
     }
     return ObsidianChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.obsidianChest, new ObsidianChestTE());
+StorageInterface.createInterface(BlockID.obsidianChest, {
+    slots: {
+        "slot^0-107": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genBlockID("crystalChest");
 Block.createBlockWithRotation("crystalChest", [
     { name: "Crystal Chest", texture: [["crystal_chest", 0], ["crystal_chest", 0], ["crystal_chest", 2], ["crystal_chest", 1], ["crystal_chest", 2], ["crystal_chest", 2]], inCreative: true }
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.crystalChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.crystalChest, 1);
+Block.setDestroyLevel(BlockID.crystalChest, 1, true);
 CustomChest.setChestRender(BlockID.crystalChest);
 var guiCrystalChest = CustomChest.createChestGui("Crystal Chest", 108);
 var CrystalChestTE = /** @class */ (function (_super) {
@@ -213,8 +263,16 @@ var CrystalChestTE = /** @class */ (function (_super) {
         return _super.call(this, guiCrystalChest) || this;
     }
     return CrystalChestTE;
-}(GenericIronChestTE));
+}(AdvancedChestTE));
 TileEntity.registerPrototype(BlockID.crystalChest, new CrystalChestTE());
+StorageInterface.createInterface(BlockID.crystalChest, {
+    slots: {
+        "slot^0-107": {
+            input: true,
+            output: true
+        }
+    }
+});
 IDRegistry.genItemID("woodCopperUpgrade");
 Item.createItem("woodCopperUpgrade", "Wood to Copper Chest Upgrade", { name: "wood_copper_upgrade" }, { stack: 1 });
 IDRegistry.genItemID("woodIronUpgrade");
@@ -266,16 +324,14 @@ function upgradeChest(x, y, z, player) {
     // clear item in hand
     Entity.setCarriedItem(player, 0, 0, 0);
 }
-if (getCoreAPILevel() >= 12) {
-    Callback.addCallback("ItemUseLocalServer", function (coords, item, block) {
-        if (block.id == 54 && (item.id == ItemID.woodCopperUpgrade || item.id == ItemID.woodIronUpgrade)) {
-            Network.sendToServer("IronChests.upgrade_wood_chest", { x: coords.x, y: coords.y, z: coords.z });
-        }
-    });
-    Network.addServerPacket("IronChests.upgrade_wood_chest", function (client, data) {
-        upgradeChest(data.x, data.y, data.z, client.getPlayerUid());
-    });
-}
+Callback.addCallback("ItemUseLocal", function (coords, item, block, player) {
+    if (block.id == 54 && (item.id == ItemID.woodCopperUpgrade || item.id == ItemID.woodIronUpgrade)) {
+        Network.sendToServer("IronChests.upgrade_wood_chest", { x: coords.x, y: coords.y, z: coords.z });
+    }
+});
+Network.addServerPacket("IronChests.upgrade_wood_chest", function (client, data) {
+    upgradeChest(data.x, data.y, data.z, client.getPlayerUid());
+});
 // Recipes
 Callback.addCallback("PreLoaded", function () {
     // Chests
@@ -391,5 +447,3 @@ Callback.addCallback("PreLoaded", function () {
         "xxx"
     ], ['x', 49, -1, 'a', 20, -1]);
 });
-ModAPI.registerAPI("IronChest", CustomChest);
-Logger.Log("CustomChest API shared with name IronChest.", "API");

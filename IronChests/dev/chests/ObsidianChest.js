@@ -8,15 +8,24 @@ Block.createBlockWithRotation("obsidianChest", [
 	sound: "stone"
 });
 ToolAPI.registerBlockMaterial(BlockID.obsidianChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.obsidianChest, 1);
+Block.setDestroyLevel(BlockID.obsidianChest, 1, true);
 CustomChest.setChestRender(BlockID.obsidianChest);
 
 let guiObsidianChest = CustomChest.createChestGui("Obsidian Chest", 108);
 
-class ObsidianChestTE extends GenericIronChestTE {
+class ObsidianChestTE extends AdvancedChestTE {
 	constructor() {
 		super(guiObsidianChest);
 	}
 }
 
 TileEntity.registerPrototype(BlockID.obsidianChest, new ObsidianChestTE());
+
+StorageInterface.createInterface(BlockID.obsidianChest, {
+	slots: {
+		"slot^0-107": {
+			input: true,
+			output: true
+		}
+	}
+});

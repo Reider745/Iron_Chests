@@ -1,6 +1,5 @@
-class GenericIronChestTE extends ChestTileEntity {
+class AdvancedChestTE extends ChestTileEntity {
 	upgrade(chestID, player) {
-		if (getCoreAPILevel() < 12) return;
 		let blockData = this.blockSource.getBlockData(this.x, this.y, this.z);
 		this.blockSource.setBlock(this.x, this.y, this.z, chestID, blockData);
 		let container = new ItemContainer(this.container.asLegacyContainer());
@@ -9,5 +8,9 @@ class GenericIronChestTE extends ChestTileEntity {
 		let tileEntity = TileEntity.addTileEntity(this.x, this.y, this.z, this.blockSource);
 		tileEntity.container = container;
 		Entity.setCarriedItem(player, 0, 0, 0);
+	}
+
+	tick() {
+		StorageInterface.checkHoppers(this);
 	}
 }

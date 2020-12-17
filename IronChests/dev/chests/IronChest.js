@@ -3,12 +3,12 @@ Block.createBlockWithRotation("ironChest", [
 	{name: "Iron Chest", texture: [["iron_chest", 0], ["iron_chest", 0], ["iron_chest", 2], ["iron_chest", 1], ["iron_chest", 2], ["iron_chest", 2]], inCreative: true}
 ], "iron_chest");
 ToolAPI.registerBlockMaterial(BlockID.ironChest, "stone", 1, true);
-Block.setDestroyLevel(BlockID.ironChest, 1);
+Block.setDestroyLevel(BlockID.ironChest, 1, true);
 CustomChest.setChestRender(BlockID.ironChest);
 
 let guiIronChest = CustomChest.createChestGui("Iron Chest", 54);
 
-class IronChestTE extends GenericIronChestTE {
+class IronChestTE extends AdvancedChestTE {
 	constructor() {
 		super(guiIronChest);
 	}
@@ -23,3 +23,12 @@ class IronChestTE extends GenericIronChestTE {
 }
 
 TileEntity.registerPrototype(BlockID.ironChest, new IronChestTE());
+
+StorageInterface.createInterface(BlockID.ironChest, {
+	slots: {
+		"slot^0-53": {
+			input: true,
+			output: true
+		}
+	}
+});
