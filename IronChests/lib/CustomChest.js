@@ -4,6 +4,28 @@ LIBRARY({
     shared: false,
     api: "CoreEngine"
 });
+var JAVA_ANIMATOR = android.animation.ValueAnimator;
+var JAVA_HANDLER = android.os.Handler;
+var LOOPER_THREAD = android.os.Looper;
+var JAVA_HANDLER_THREAD = new JAVA_HANDLER(LOOPER_THREAD.getMainLooper());
+function createAnim(_values, _duration, _updateFunc){
+	var animation = JAVA_ANIMATOR.ofFloat(_values);
+	animation.setDuration(_duration);
+	if(_updateFunc)animation.addUpdateListener({
+		onAnimationUpdate : function(updatedAnim){
+			_updateFunc(updatedAnim.getAnimatedValue(), updatedAnim);
+		}
+	});
+	JAVA_HANDLER_THREAD.post({
+		run: function(){
+			animation.start();
+		}
+	})
+	return animation;
+};
+function calculateHeight(w, h){
+    return 1000*h/w;
+};
 function defaultChestData(){
     return {
         container: null,
@@ -18,8 +40,55 @@ function defaultChestData(){
             y: 0
         },
         selectedSlot: null,
-        selectedSlotType: null
+        selectedSlotType: null,
+        lastClickTime: 0,
+        anim: {
+            pos1: {
+                slotSize: 0,
+                window: null,
+                x: 0,
+                y: 0
+            },
+            pos2: {
+                x: 0,
+                y: 0
+            }
+        }
     }
+}
+function startAnim(window, slot){
+    var content = window.getContent();
+    var slot_id = 'slot' + parseInt(Math.random()*10000000);
+    var pos1 = {x: chestData.anim.pos1.x, y: chestData.anim.pos1.y};
+    var pos2 = {x: chestData.anim.pos2.x, y: chestData.anim.pos2.y};
+    content.elements[slot_id] = {
+        type: "slot", 
+        x: pos1.x - 75/2, 
+        y: pos1.y - 75/2, 
+        size: 75, 
+        bitmap: "_default_slot_empty",
+        visual: true
+    };
+    window.forceRefresh();
+    chestData.container.setSlot(slot_id, slot.id, 1, slot.data, slot.extra)
+    var elements = window.getElements();
+    var animation = pos1.y != pos2.y ? createAnim([pos1.y, pos2.y], 200, function(value){
+        if(!window.isOpened()) return;
+        var percent = Math.abs((value - pos1.y)/(pos2.y - pos1.y));
+        elements.get(slot_id).setPosition(pos1.x + (pos2.x - pos1.x)*percent - content.elements[slot_id].size/2, value - content.elements[slot_id].size/2);
+    }) : createAnim([pos1.x, pos2.x], 200, function(value){
+        if(!window.isOpened()) return;
+        elements.get(slot_id).setPosition(value - content.elements[slot_id].size/2, pos2.y - content.elements[slot_id].size/2);
+    })
+    animation.addListener({
+        onAnimationEnd: function(){
+            delete content.elements[slot_id];
+            if(!window.isOpened()) return;
+            var elementProvider = window.getElementProvider();
+            elementProvider.removeElement(elements.get(slot_id));
+            window.forceRefresh();
+        }
+    });
 }
 var chestData = defaultChestData();
 var CustomChest = {
@@ -48,13 +117,22 @@ var CustomChest = {
             type: "scale",
             x: -100,
             y: -100,
-            z: 10,
+            z: 20,
             direction: 0,
             bitmap: "transferBarFull",
             background: "transferBar",
             value: 0,
             scale: 60/108*slotSize/15
         };
+        elements["selection1"] = {
+            type: "image",
+            x: -1000,
+            y: -1000,
+            z: 9,
+            bitmap: "_selection",
+            width: slotSize,
+            height: slotSize 
+        }
         for (var i = 0; i < count; i++) {
             var x = i % inRow;
             var y = Math.floor(i / inRow);
@@ -65,44 +143,92 @@ var CustomChest = {
                     var item = chestData.container.getSlot(slot_id);
                     var uiAdapter = chestData.container.getUiAdapter();
                     event_type = event.type;
-                    if(event.type == 'CLICK')event_type = 'UP';
-                    if(event_type == 'DOWN'){
-                        if(chestData.selectedSlot != null){
-                            if(chestData.selectedSlot == slot_id) {
-                                chestData.selectedSlot = null;
-                                chestData.selectedSlotType = null;
-                                uiAdapter.getElement("scale2").setPosition(-100, -100);
-                                chestData.container.setScale('scale2', 0);
-                                uiAdapter.getElement("scale1").setPosition(-100, -100);
-                                chestData.container.setScale('scale1', 0);
-                                return;
-                            }
-                            chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
-                            if(chestData.selectedSlotType == 0){
-                                chestData.container.sendInventoryToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
-                            } else {
-                                chestData.container.sendEvent("SlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
-                                //chestData.container.sendSlotToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
+                    if(event.type == 'CLICK' && chestData.selectedSlot != null){
+                        if(chestData.selectedSlot == slot_id) {
+                            chestData.selectedSlot = null;
+                            chestData.selectedSlotType = null;
+                            if(java.lang.System.currentTimeMillis() - chestData.lastClickTime <= 500){
+                                var maxStack = Item.getMaxStack(item.id);
+                                if(item.count < maxStack){
+                                    var needCount = maxStack - item.count;
+                                    var slots = chestData.container.slots;
+                                    for(var i in slots){
+                                        var item2 = slots[i];
+                                        if(i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        var _count = Math.min(item2.count, needCount);
+                                        needCount -= _count;
+                                        chestData.container.sendEvent("SlotToSlot", {slot1: i, slot2: slot_id, count: _count});
+                                        if(needCount <= 0) break;
+                                    }
+                                    if(needCount > 0)for (var i = 0; i <= 35; i++){
+                                        var item2 = Player.getInventorySlot(i);
+                                        if(item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        var _count = Math.min(item2.count, needCount);
+                                        needCount -= _count;
+                                        chestData.container.sendInventoryToSlotTransaction(i, slot_id, _count);
+                                        if(needCount <= 0) break;
+                                    }
+                                }
                             }
                             uiAdapter.getElement("scale2").setPosition(-100, -100);
                             chestData.container.setScale('scale2', 0);
                             uiAdapter.getElement("scale1").setPosition(-100, -100);
                             chestData.container.setScale('scale1', 0);
-                            chestData.selectedSlot = null;
-                            chestData.selectedSlotType = null;
+                            uiAdapter.getElement("selection1").setPosition(-1000, -1000);
+                            uiAdapter.getElement("selection2").setPosition(-1000, -1000);
+                            return;
+                        }
+                        chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
+                        if(chestData.selectedSlotType == 0){
+                            chestData.container.sendInventoryToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
                         } else {
-                            if(item.id == 0)return;
-                            chestData.item = {
-                                maxCount: item.count,
-                                count: 0
-                            }
-                            chestData.start = World.getThreadTime() + 10;
-                            chestData.tickStarted = false;
-                            chestData.barData = {
-                                name: "scale1",
-                                x: this.x + (slotSize - elements['scale1'].scale*15)/2,
-                                y: this.y
-                            }
+                            chestData.container.sendEvent("SlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
+                            //chestData.container.sendSlotToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
+                        }
+                        chestData.anim.pos2 = {
+                            x: element.window.location.windowToGlobal(this.x + slotSize/2) + 340,
+                            y: element.window.location.windowToGlobal(((this.y + slotSize/2)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100
+                        }
+                        if(chestData.selectedSlotType){
+                            chestData.anim.pos1.x = element.window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + 340;
+                            chestData.anim.pos1.y = element.window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100;
+                        } else {
+                            var __window = chestData.anim.pos1.window;
+                            chestData.anim.pos1.x = __window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + 20;
+                            chestData.anim.pos1.y = __window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*__window.getScale() - __window.layout.getScrollY())/__window.getScale()) + 100;
+                        }
+                        startAnim(element.window.getParentWindow().getWindow('overlay'), chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                        uiAdapter.getElement("scale2").setPosition(-100, -100);
+                        chestData.container.setScale('scale2', 0);
+                        uiAdapter.getElement("scale1").setPosition(-100, -100);
+                        chestData.container.setScale('scale1', 0);
+                        uiAdapter.getElement("selection1").setPosition(-1000, -1000);
+                        uiAdapter.getElement("selection2").setPosition(-1000, -1000);
+                        chestData.selectedSlot = null;
+                        chestData.selectedSlotType = null;
+                        return;
+                    }
+                    if(event.type == 'CLICK')event_type = 'UP';
+                    if(event_type == 'DOWN'){
+                        if(item.id == 0 || chestData.selectedSlot != null)return;
+                        chestData.item = {
+                            maxCount: item.count,
+                            count: 0
+                        }
+                        chestData.start = World.getThreadTime() + 10;
+                        chestData.tickStarted = false;
+                        chestData.barData = {
+                            name: "scale1",
+                            x: this.x + (slotSize - elements['scale1'].scale*15)/2,
+                            y: this.y
+                        }
+                        uiAdapter.getElement("selection1").setPosition(this.x, this.y);
+                        chestData.lastClickTime = java.lang.System.currentTimeMillis();
+                        chestData.anim.pos1 = {
+                            window: element.window,
+                            slotSize: slotSize,
+                            pre_x: this.x,
+                            pre_y: this.y
                         }
                     }
                     if(event_type == 'UP'){
@@ -130,18 +256,61 @@ var CustomChest = {
             },
             elements: elements
         });
+        var window2 = window.addWindow('overlay', {
+            location: { 
+                x: 0, 
+                y: 0, 
+                width: 1000, 
+                height: UI.getScreenHeight()
+            }, 
+            drawing: [{type: 'color', color: android.graphics.Color.TRANSPARENT}],
+            elements: {
+                frame: {
+                    type: "frame",
+                    x: 0,
+                    y: 0,
+                    z: 0,
+                    width: 1000,
+                    height: UI.getScreenHeight(),
+                    bitmap: "_default_slot_empty",
+                    scale: 1,
+                    onTouchEvent: function(element, event){
+                        alert(event._x + " : " + event._y);
+                    }
+                },
+                selectionasd: {
+                    type: "image",
+                    x: -1000,
+                    y: -1000,
+                    z: 9,
+                    bitmap: "_selection",
+                    scale: 0.5
+                }
+            }
+        });
+        window2.setAsGameOverlay(true);
+        window2.setTouchable(false);
         var inv_elements = window.getWindow('inventory').getContent();
         inv_elements.elements['scale2'] = {
             type: "scale",
             x: -100,
             y: -100,
-            z: 10,
+            z: 20,
             direction: 0,
             bitmap: "transferBarFull",
             background: "transferBar",
             value: 0,
             scale: 60/108*251/15
         };
+        inv_elements.elements["selection2"] = {
+            type: "image",
+            x: -1000,
+            y: -1000,
+            z: 9,
+            bitmap: "_selection",
+            width: 251,
+            height: 251
+        }
         inv_elements.elements["_CLICKFRAME_"] = {
             type: "frame",
             x: 0,
@@ -156,43 +325,90 @@ var CustomChest = {
                 var item = Player.getInventorySlot(slot_id);
                 var uiAdapter = chestData.container.getUiAdapter();
                 event_type = event.type;
-                if(event.type == 'CLICK')event_type = 'UP';
-                if(event_type == 'DOWN'){
-                    if(chestData.selectedSlot != null){
-                        if(chestData.selectedSlot == slot_id) {
-                            chestData.selectedSlot = null;
-                            chestData.selectedSlotType = null;
-                            uiAdapter.getElement("scale2").setPosition(-100, -100);
-                            chestData.container.setScale('scale2', 0);
-                            uiAdapter.getElement("scale1").setPosition(-100, -100);
-                            chestData.container.setScale('scale1', 0);
-                            return;
-                        }
-                        chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
-                        if(chestData.selectedSlotType == 0){
-                            //chestData.container.handleInventoryToSlotTransaction(this.index, currentSelectedSlot.slotName, amount);
-                        } else {
-                            chestData.container.sendSlotToInventoryTransaction(chestData.selectedSlot, chestData.item.count);
+                if(event.type == 'CLICK' && chestData.selectedSlot != null){
+                    if(chestData.selectedSlot == slot_id) {
+                        chestData.selectedSlot = null;
+                        chestData.selectedSlotType = null;
+                        if(java.lang.System.currentTimeMillis() - chestData.lastClickTime <= 500){
+                            var maxStack = Item.getMaxStack(item.id);
+                            if(item.count < maxStack){
+                                var needCount = maxStack - item.count;
+                                var slots = chestData.container.slots;
+                                for(var i in slots){
+                                    var item2 = slots[i];
+                                    if(i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                    var _count = Math.min(item2.count, needCount);
+                                    needCount -= _count;
+                                    chestData.container.sendEvent("SlotToSlot", {slot1: i, slot2: slot_id, count: _count});
+                                    if(needCount <= 0) break;
+                                }
+                                if(needCount > 0)for (var i = 0; i <= 35; i++){
+                                    var item2 = Player.getInventorySlot(i);
+                                    if(item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                    var _count = Math.min(item2.count, needCount);
+                                    needCount -= _count;
+                                    chestData.container.sendInventoryToSlotTransaction(i, slot_id, _count);
+                                    if(needCount <= 0) break;
+                                }
+                            }
                         }
                         uiAdapter.getElement("scale2").setPosition(-100, -100);
                         chestData.container.setScale('scale2', 0);
                         uiAdapter.getElement("scale1").setPosition(-100, -100);
                         chestData.container.setScale('scale1', 0);
-                        chestData.selectedSlot = null;
-                        chestData.selectedSlotType = null;
+                        uiAdapter.getElement("selection1").setPosition(-1000, -1000);
+                        uiAdapter.getElement("selection2").setPosition(-1000, -1000);
+                        return;
+                    }
+                    chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
+                    if(chestData.selectedSlotType == 0){
+                        chestData.container.sendEvent("InventorySlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
                     } else {
-                        if(item.id == 0)return;
-                        chestData.item = {
-                            maxCount: item.count,
-                            count: 0
-                        }
-                        chestData.start = World.getThreadTime() + 10;
-                        chestData.tickStarted = false;
-                        chestData.barData = {
-                            name: "scale2",
-                            x: Math.floor(event.x/250)*250 + (250 - inv_elements.elements['scale2'].scale*15)/2,
-                            y: Math.floor(event.y/250)*250
-                        }
+                        chestData.container.sendEvent("SlotToInventorySlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
+                    }
+                    chestData.anim.pos2 = {
+                        x: element.window.location.windowToGlobal(Math.floor(event.x/250)*250 + 125) + 20,
+                        y: element.window.location.windowToGlobal(((Math.floor(event.y/250)*250 + 125)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100
+                    }
+                    if(chestData.selectedSlotType){
+                        var __window = chestData.anim.pos1.window;
+                        var slotSize = chestData.anim.pos1.slotSize;
+                        chestData.anim.pos1.x = __window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + 340;
+                        chestData.anim.pos1.y = __window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*__window.getScale() - __window.layout.getScrollY())/__window.getScale()) + 100;
+                    } else {
+                        chestData.anim.pos1.x = element.window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + 20;
+                        chestData.anim.pos1.y = element.window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100;
+                    }
+                    startAnim(element.window.getParentWindow().getWindow('overlay'), chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                    uiAdapter.getElement("scale2").setPosition(-100, -100);
+                    chestData.container.setScale('scale2', 0);
+                    uiAdapter.getElement("scale1").setPosition(-100, -100);
+                    chestData.container.setScale('scale1', 0);
+                    uiAdapter.getElement("selection1").setPosition(-1000, -1000);
+                    uiAdapter.getElement("selection2").setPosition(-1000, -1000);
+                    chestData.selectedSlot = null;
+                    chestData.selectedSlotType = null;
+                }
+                if(event.type == 'CLICK')event_type = 'UP';
+                if(event_type == 'DOWN'){
+                    if(item.id == 0 || chestData.selectedSlot != null)return;
+                    chestData.item = {
+                        maxCount: item.count,
+                        count: 0
+                    }
+                    chestData.start = World.getThreadTime() + 10;
+                    chestData.tickStarted = false;
+                    chestData.barData = {
+                        name: "scale2",
+                        x: Math.floor(event.x/250)*250 + (250 - inv_elements.elements['scale2'].scale*15)/2,
+                        y: Math.floor(event.y/250)*250
+                    }
+                    uiAdapter.getElement("selection2").setPosition(Math.floor(event.x/250)*250, Math.floor(event.y/250)*250);
+                    chestData.lastClickTime = java.lang.System.currentTimeMillis();
+                    chestData.anim.pos1 = {
+                        window: element.window,
+                        pre_x: event.x,
+                        pre_y: event.y
                     }
                 }
                 if(event_type == 'UP'){
@@ -235,14 +451,51 @@ var ChestTileEntity = /** @class */ (function () {
         SlotToSlot: function(eventData, connectedClient) {
             var slot1 = this.container.getSlot(eventData.slot1);
             var slot2 = this.container.getSlot(eventData.slot2);
-            if(slot2.id != 0 && (slot2.id != slot1.id || slot2.data != slot1.data || slot2.extra != slot1.extra)) return;
+            if(slot2.id != slot1.id && slot2.id != 0){
+                slot1 = slot1.asScriptable();
+                this.container.setSlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
+                this.container.setSlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
+                this.container.sendChanges();
+                return;
+            }
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
             this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             this.container.setSlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
             slot1.validate();
             this.container.sendChanges();
-        }
+        },
+        InventorySlotToSlot: function(eventData, connectedClient) {
+            var player = new PlayerActor(connectedClient.getPlayerUid());
+            var slot1 = player.getInventorySlot(eventData.slot1);
+            var slot2 = player.getInventorySlot(eventData.slot2);
+            if(slot2.id != slot1.id && slot2.id != 0){
+                player.setInventorySlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
+                player.setInventorySlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
+                return;
+            }
+            var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
+            if(_count == 0) return;
+            player.setInventorySlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
+            player.setInventorySlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+        },
+        SlotToInventorySlot: function(eventData, connectedClient) {
+            var player = new PlayerActor(connectedClient.getPlayerUid());
+            var slot1 = this.container.getSlot(eventData.slot1);
+            var slot2 = player.getInventorySlot(eventData.slot2);
+            if(slot2.id != slot1.id && slot2.id != 0){
+                player.setInventorySlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
+                this.container.setSlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
+                this.container.sendChanges();
+                return;
+            }
+            var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
+            if(_count == 0) return;
+            this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
+            player.setInventorySlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            slot1.validate();
+            this.container.sendChanges();
+        },
     };
     ChestTileEntity.prototype.client = {
         tick: function(){
