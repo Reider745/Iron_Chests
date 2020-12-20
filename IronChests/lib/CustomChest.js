@@ -172,7 +172,7 @@ var CustomChest = {
                                     for(var i in slots){
                                         if(i[0] == '$') continue;
                                         var item2 = slots[i];
-                                        if(!item2 || i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        if(!item2 || i == slot_id || item2.id != item.id || item2.data != item.data || (item2.extra != item.extra && ((!item2.extra || item2.extra.getAllCustomData()) != (!item.extra || item.extra.getAllCustomData())))) continue;
                                         var _count = Math.min(item2.count, needCount);
                                         needCount -= _count;
                                         chestData.container.sendEvent("SlotToSlot", {slot1: i, slot2: slot_id, count: _count});
@@ -190,7 +190,7 @@ var CustomChest = {
                                         var _scrollY = getScrollY(inventoryWindow);
                                         for (var i = 0; i <= 35; i++){
                                             var item2 = Player.getInventorySlot(i);
-                                            if(!item2 || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                            if(!item2 || item2.id != item.id || item2.data != item.data || (item2.extra != item.extra && ((!item2.extra || item2.extra.getAllCustomData()) != (!item.extra || item.extra.getAllCustomData())))) continue;
                                             var _count = Math.min(item2.count, needCount);
                                             needCount -= _count;
                                             chestData.container.sendEvent("InventorySlotToContainerSlot", {slot1: i, slot2: slot_id, count: _count});
@@ -214,7 +214,8 @@ var CustomChest = {
                         }
                         chestData.item.count = Math.min(Math.floor(chestData.item.count), chestData.item.maxCount);
                         if(chestData.selectedSlotType == 0){
-                            chestData.container.sendInventoryToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
+                            chestData.container.sendEvent("InventorySlotToContainerSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
+                            //chestData.container.sendInventoryToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
                         } else {
                             chestData.container.sendEvent("SlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
                             //chestData.container.sendSlotToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
@@ -368,7 +369,7 @@ var CustomChest = {
                                 }
                                 for (var i = 0; i <= 35; i++){
                                     var item2 = Player.getInventorySlot(i);
-                                    if(!item2 || i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                    if(!item2 || i == slot_id || item2.id != item.id || item2.data != item.data || (item2.extra != item.extra && ((!item2.extra || item2.extra.getAllCustomData()) != (!item.extra || item.extra.getAllCustomData())))) continue;
                                     var _count = Math.min(item2.count, needCount);
                                     needCount -= _count;
                                     chestData.container.sendEvent("InventorySlotToSlot", {slot1: i, slot2: slot_id, count: _count});
@@ -387,7 +388,7 @@ var CustomChest = {
                                     for(var i in slots){
                                         if(i[0] == '$') continue;
                                         var item2 = slots[i];
-                                        if(!item2 || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        if(!item2 || item2.id != item.id || item2.data != item.data || (item2.extra != item.extra && ((!item2.extra || item2.extra.getAllCustomData()) != (!item.extra || item.extra.getAllCustomData())))) continue;
                                         var _count = Math.min(item2.count, needCount);
                                         needCount -= _count;
                                         chestData.container.sendEvent("SlotToInventorySlot", {slot1: i, slot2: slot_id, count: _count});
@@ -512,7 +513,7 @@ var ChestTileEntity = /** @class */ (function () {
         SlotToSlot: function(eventData, connectedClient) {
             var slot1 = this.container.getSlot(eventData.slot1);
             var slot2 = this.container.getSlot(eventData.slot2);
-            if(slot2.id != slot1.id && slot2.id != 0){
+            if((slot2.id != slot1.id || slot2.data != slot1.data || (slot2.extra != slot1.extra && ((!slot2.extra || slot2.extra.getAllCustomData()) != (!slot1.extra || slot1.extra.getAllCustomData())))) && slot2.id != 0){
                 slot1 = slot1.asScriptable();
                 this.container.setSlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
                 this.container.setSlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
@@ -530,7 +531,7 @@ var ChestTileEntity = /** @class */ (function () {
             var player = new PlayerActor(connectedClient.getPlayerUid());
             var slot1 = player.getInventorySlot(eventData.slot1);
             var slot2 = player.getInventorySlot(eventData.slot2);
-            if(slot2.id != slot1.id && slot2.id != 0){
+            if((slot2.id != slot1.id || slot2.data != slot1.data || (slot2.extra != slot1.extra && ((!slot2.extra || slot2.extra.getAllCustomData()) != (!slot1.extra || slot1.extra.getAllCustomData())))) && slot2.id != 0){
                 player.setInventorySlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
                 player.setInventorySlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
                 return;
@@ -544,7 +545,7 @@ var ChestTileEntity = /** @class */ (function () {
             var player = new PlayerActor(connectedClient.getPlayerUid());
             var slot1 = this.container.getSlot(eventData.slot1);
             var slot2 = player.getInventorySlot(eventData.slot2);
-            if(slot2.id != slot1.id && slot2.id != 0){
+            if((slot2.id != slot1.id || slot2.data != slot1.data || (slot2.extra != slot1.extra && ((!slot2.extra || slot2.extra.getAllCustomData()) != (!slot1.extra || slot1.extra.getAllCustomData())))) && slot2.id != 0){
                 player.setInventorySlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
                 this.container.setSlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
                 this.container.sendChanges();
@@ -561,7 +562,7 @@ var ChestTileEntity = /** @class */ (function () {
             var player = new PlayerActor(connectedClient.getPlayerUid());
             var slot1 = player.getInventorySlot(eventData.slot1);
             var slot2 = this.container.getSlot(eventData.slot2);
-            if(slot2.id != slot1.id && slot2.id != 0){
+            if((slot2.id != slot1.id || slot2.data != slot1.data || (slot2.extra != slot1.extra && ((!slot2.extra || slot2.extra.getAllCustomData()) != (!slot1.extra || slot1.extra.getAllCustomData())))) && slot2.id != 0){
                 player.setInventorySlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
                 this.container.setSlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
                 this.container.sendChanges();
