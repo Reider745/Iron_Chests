@@ -23,9 +23,6 @@ function createAnim(_values, _duration, _updateFunc){
 	})
 	return animation;
 };
-function calculateHeight(w, h){
-    return 1000*h/w;
-};
 function defaultChestData(){
     return {
         container: null,
@@ -58,7 +55,7 @@ function defaultChestData(){
 }
 function startAnim(window, slot){
     var content = window.getContent();
-    var slot_id = 'slot' + parseInt(Math.random()*10000000);
+    var slot_id = '$slot' + parseInt(Math.random()*10000000);
     var pos1 = {x: chestData.anim.pos1.x, y: chestData.anim.pos1.y};
     var pos2 = {x: chestData.anim.pos2.x, y: chestData.anim.pos2.y};
     content.elements[slot_id] = {
@@ -70,13 +67,14 @@ function startAnim(window, slot){
         visual: true
     };
     window.forceRefresh();
-    chestData.container.setSlot(slot_id, slot.id, 1, slot.data, slot.extra)
+    chestData.container.setSlot(slot_id, slot.id, 1, slot.data, slot.extra);
+    delete chestData.container.slots[slot_id];
     var elements = window.getElements();
-    var animation = pos1.y != pos2.y ? createAnim([pos1.y, pos2.y], 200, function(value){
+    var animation = pos1.y != pos2.y ? createAnim([pos1.y, pos2.y], 300, function(value){
         if(!window.isOpened()) return;
         var percent = Math.abs((value - pos1.y)/(pos2.y - pos1.y));
         elements.get(slot_id).setPosition(pos1.x + (pos2.x - pos1.x)*percent - content.elements[slot_id].size/2, value - content.elements[slot_id].size/2);
-    }) : createAnim([pos1.x, pos2.x], 200, function(value){
+    }) : createAnim([pos1.x, pos2.x], 300, function(value){
         if(!window.isOpened()) return;
         elements.get(slot_id).setPosition(value - content.elements[slot_id].size/2, pos2.y - content.elements[slot_id].size/2);
     })
@@ -89,6 +87,17 @@ function startAnim(window, slot){
             window.forceRefresh();
         }
     });
+}
+function getScrollY(window){
+    let view = window.layout;
+    var scrollY = 0;
+    try {
+        while(true) {
+            scrollY += view.getScrollY();
+            view = view.getChildAt(0);
+        }
+    } catch(errr) {};
+    return scrollY;
 }
 var chestData = defaultChestData();
 var CustomChest = {
@@ -152,21 +161,46 @@ var CustomChest = {
                                 if(item.count < maxStack){
                                     var needCount = maxStack - item.count;
                                     var slots = chestData.container.slots;
+                                    var scrollY = getScrollY(element.window);
+                                    chestData.anim.pos2 = {
+                                        x: element.window.location.windowToGlobal(this.x + slotSize/2) + element.window.location.x,
+                                        y: element.window.location.windowToGlobal((this.y + slotSize/2) - scrollY/element.window.getScale()) + element.window.location.y
+                                    }
+                                    var overlayWindow = element.window.getParentWindow().getWindow('overlay');
+                                    var contentWindow = element.window;
+                                    var _elements_ = element.window.getContent().elements;
                                     for(var i in slots){
+                                        if(i[0] == '$') continue;
                                         var item2 = slots[i];
-                                        if(i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        if(!item2 || i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
                                         var _count = Math.min(item2.count, needCount);
                                         needCount -= _count;
                                         chestData.container.sendEvent("SlotToSlot", {slot1: i, slot2: slot_id, count: _count});
+                                        if(!_elements_[i])continue;
+                                        chestData.anim.pos1 = {
+                                            x: contentWindow.location.windowToGlobal(_elements_[i].x + _elements_[i].size/2) + contentWindow.location.x,
+                                            y: contentWindow.location.windowToGlobal((_elements_[i].y + _elements_[i].size/2) - scrollY/contentWindow.getScale()) + contentWindow.location.y
+                                        }
+                                        startAnim(overlayWindow, chestData.container.getSlot(i));
                                         if(needCount <= 0) break;
                                     }
-                                    if(needCount > 0)for (var i = 0; i <= 35; i++){
-                                        var item2 = Player.getInventorySlot(i);
-                                        if(item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
-                                        var _count = Math.min(item2.count, needCount);
-                                        needCount -= _count;
-                                        chestData.container.sendInventoryToSlotTransaction(i, slot_id, _count);
-                                        if(needCount <= 0) break;
+                                    if(needCount > 0){
+                                        var inventoryWindow = element.window.getParentWindow().getWindow('inventory');
+                                        var _elements = inventoryWindow.getContent().elements;
+                                        var _scrollY = getScrollY(inventoryWindow);
+                                        for (var i = 0; i <= 35; i++){
+                                            var item2 = Player.getInventorySlot(i);
+                                            if(!item2 || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                            var _count = Math.min(item2.count, needCount);
+                                            needCount -= _count;
+                                            chestData.container.sendEvent("InventorySlotToContainerSlot", {slot1: i, slot2: slot_id, count: _count});
+                                            chestData.anim.pos1 = {
+                                                x: inventoryWindow.location.windowToGlobal(_elements['__invSlot' + i].x + 125) + inventoryWindow.location.x,
+                                                y: inventoryWindow.location.windowToGlobal(((_elements['__invSlot' + i].y + 125)*inventoryWindow.getScale() - _scrollY)/inventoryWindow.getScale()) + inventoryWindow.location.y
+                                            }
+                                            startAnim(overlayWindow, Player.getInventorySlot(i));
+                                            if(needCount <= 0) break;
+                                        }
                                     }
                                 }
                             }
@@ -178,26 +212,37 @@ var CustomChest = {
                             uiAdapter.getElement("selection2").setPosition(-1000, -1000);
                             return;
                         }
-                        chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
+                        chestData.item.count = Math.min(Math.floor(chestData.item.count), chestData.item.maxCount);
                         if(chestData.selectedSlotType == 0){
                             chestData.container.sendInventoryToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
                         } else {
                             chestData.container.sendEvent("SlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
                             //chestData.container.sendSlotToSlotTransaction(chestData.selectedSlot, slot_id, chestData.item.count);
                         }
+                        var scrollY = getScrollY(element.window);
                         chestData.anim.pos2 = {
-                            x: element.window.location.windowToGlobal(this.x + slotSize/2) + 340,
-                            y: element.window.location.windowToGlobal(((this.y + slotSize/2)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100
+                            x: element.window.location.windowToGlobal(this.x + slotSize/2) + element.window.location.x,
+                            y: element.window.location.windowToGlobal((this.y + slotSize/2) - scrollY/element.window.getScale()) + element.window.location.y
                         }
                         if(chestData.selectedSlotType){
-                            chestData.anim.pos1.x = element.window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + 340;
-                            chestData.anim.pos1.y = element.window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100;
+                            chestData.anim.pos1.x = element.window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + element.window.location.x;
+                            chestData.anim.pos1.y = element.window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*element.window.getScale() - scrollY)/element.window.getScale()) + element.window.location.y;
                         } else {
                             var __window = chestData.anim.pos1.window;
-                            chestData.anim.pos1.x = __window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + 20;
-                            chestData.anim.pos1.y = __window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*__window.getScale() - __window.layout.getScrollY())/__window.getScale()) + 100;
+                            var _scrollY = getScrollY(__window);
+                            chestData.anim.pos1.x = __window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + __window.location.x;
+                            chestData.anim.pos1.y = __window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*__window.getScale() - _scrollY)/__window.getScale()) + __window.location.y;
                         }
-                        startAnim(element.window.getParentWindow().getWindow('overlay'), chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                        var overlayWindow = element.window.getParentWindow().getWindow('overlay');
+                        startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                        var _pos2 = {
+                            x: chestData.anim.pos2.x,
+                            y: chestData.anim.pos2.y
+                        };
+                        chestData.anim.pos2 = chestData.anim.pos1;
+                        chestData.anim.pos1 = _pos2;
+                        var item2 = chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot);
+                        if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item);
                         uiAdapter.getElement("scale2").setPosition(-100, -100);
                         chestData.container.setScale('scale2', 0);
                         uiAdapter.getElement("scale1").setPosition(-100, -100);
@@ -213,7 +258,7 @@ var CustomChest = {
                         if(item.id == 0 || chestData.selectedSlot != null)return;
                         chestData.item = {
                             maxCount: item.count,
-                            count: 0
+                            count: 1
                         }
                         chestData.start = World.getThreadTime() + 10;
                         chestData.tickStarted = false;
@@ -265,27 +310,7 @@ var CustomChest = {
             }, 
             drawing: [{type: 'color', color: android.graphics.Color.TRANSPARENT}],
             elements: {
-                frame: {
-                    type: "frame",
-                    x: 0,
-                    y: 0,
-                    z: 0,
-                    width: 1000,
-                    height: UI.getScreenHeight(),
-                    bitmap: "_default_slot_empty",
-                    scale: 1,
-                    onTouchEvent: function(element, event){
-                        alert(event._x + " : " + event._y);
-                    }
-                },
-                selectionasd: {
-                    type: "image",
-                    x: -1000,
-                    y: -1000,
-                    z: 9,
-                    bitmap: "_selection",
-                    scale: 0.5
-                }
+
             }
         });
         window2.setAsGameOverlay(true);
@@ -333,22 +358,47 @@ var CustomChest = {
                             var maxStack = Item.getMaxStack(item.id);
                             if(item.count < maxStack){
                                 var needCount = maxStack - item.count;
-                                var slots = chestData.container.slots;
-                                for(var i in slots){
-                                    var item2 = slots[i];
-                                    if(i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                var inventoryWindow = element.window;
+                                var _elements = inventoryWindow.getContent().elements;
+                                var _scrollY = getScrollY(inventoryWindow);
+                                var overlayWindow = element.window.getParentWindow().getWindow('overlay');
+                                chestData.anim.pos2 = {
+                                    x: element.window.location.windowToGlobal(Math.floor(event.x/250)*250 + 125) + element.window.location.x,
+                                    y: element.window.location.windowToGlobal(((Math.floor(event.y/250)*250 + 125)*element.window.getScale() - _scrollY)/element.window.getScale()) + element.window.location.y
+                                }
+                                for (var i = 0; i <= 35; i++){
+                                    var item2 = Player.getInventorySlot(i);
+                                    if(!item2 || i == slot_id || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
                                     var _count = Math.min(item2.count, needCount);
                                     needCount -= _count;
-                                    chestData.container.sendEvent("SlotToSlot", {slot1: i, slot2: slot_id, count: _count});
+                                    chestData.container.sendEvent("InventorySlotToSlot", {slot1: i, slot2: slot_id, count: _count});
+                                    chestData.anim.pos1 = {
+                                        x: inventoryWindow.location.windowToGlobal(_elements['__invSlot' + i].x + 125) + inventoryWindow.location.x,
+                                        y: inventoryWindow.location.windowToGlobal(((_elements['__invSlot' + i].y + 125)*inventoryWindow.getScale() - _scrollY)/inventoryWindow.getScale()) + inventoryWindow.location.y
+                                    }
+                                    startAnim(overlayWindow, Player.getInventorySlot(i));
                                     if(needCount <= 0) break;
                                 }
-                                if(needCount > 0)for (var i = 0; i <= 35; i++){
-                                    var item2 = Player.getInventorySlot(i);
-                                    if(item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
-                                    var _count = Math.min(item2.count, needCount);
-                                    needCount -= _count;
-                                    chestData.container.sendInventoryToSlotTransaction(i, slot_id, _count);
-                                    if(needCount <= 0) break;
+                                if(needCount > 0){
+                                    var contentWindow = element.window.getParentWindow().getWindow('content');
+                                    var _elements_ = contentWindow.getContent().elements;
+                                    var scrollY = getScrollY(contentWindow);
+                                    var slots = chestData.container.slots;
+                                    for(var i in slots){
+                                        if(i[0] == '$') continue;
+                                        var item2 = slots[i];
+                                        if(!item2 || item2.id != item.id || item2.data != item2.data || item2.extra != item.extra) continue;
+                                        var _count = Math.min(item2.count, needCount);
+                                        needCount -= _count;
+                                        chestData.container.sendEvent("SlotToInventorySlot", {slot1: i, slot2: slot_id, count: _count});
+                                        if(!_elements_[i])continue;
+                                        chestData.anim.pos1 = {
+                                            x: contentWindow.location.windowToGlobal(_elements_[i].x + _elements_[i].size/2) + contentWindow.location.x,
+                                            y: contentWindow.location.windowToGlobal((_elements_[i].y + _elements_[i].size/2) - scrollY/contentWindow.getScale()) + contentWindow.location.y
+                                        }
+                                        startAnim(overlayWindow, chestData.container.getSlot(i));
+                                        if(needCount <= 0) break;
+                                    }
                                 }
                             }
                         }
@@ -360,26 +410,37 @@ var CustomChest = {
                         uiAdapter.getElement("selection2").setPosition(-1000, -1000);
                         return;
                     }
-                    chestData.item.count = Math.min(Math.round(chestData.item.count), chestData.item.maxCount);
+                    chestData.item.count = Math.min(Math.floor(chestData.item.count), chestData.item.maxCount);
                     if(chestData.selectedSlotType == 0){
                         chestData.container.sendEvent("InventorySlotToSlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
                     } else {
                         chestData.container.sendEvent("SlotToInventorySlot", {slot1: chestData.selectedSlot, slot2: slot_id, count: chestData.item.count});
                     }
+                    var scrollY = getScrollY(element.window);
                     chestData.anim.pos2 = {
-                        x: element.window.location.windowToGlobal(Math.floor(event.x/250)*250 + 125) + 20,
-                        y: element.window.location.windowToGlobal(((Math.floor(event.y/250)*250 + 125)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100
+                        x: element.window.location.windowToGlobal(Math.floor(event.x/250)*250 + 125) + element.window.location.x,
+                        y: element.window.location.windowToGlobal(((Math.floor(event.y/250)*250 + 125)*element.window.getScale() - scrollY)/element.window.getScale()) + element.window.location.y
                     }
                     if(chestData.selectedSlotType){
                         var __window = chestData.anim.pos1.window;
                         var slotSize = chestData.anim.pos1.slotSize;
-                        chestData.anim.pos1.x = __window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + 340;
-                        chestData.anim.pos1.y = __window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*__window.getScale() - __window.layout.getScrollY())/__window.getScale()) + 100;
+                        var _scrollY = getScrollY(__window);
+                        chestData.anim.pos1.x = __window.location.windowToGlobal(chestData.anim.pos1.pre_x + slotSize/2) + __window.location.x;
+                        chestData.anim.pos1.y = __window.location.windowToGlobal(((chestData.anim.pos1.pre_y + slotSize/2)*__window.getScale() - _scrollY)/__window.getScale()) + __window.location.y;
                     } else {
-                        chestData.anim.pos1.x = element.window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + 20;
-                        chestData.anim.pos1.y = element.window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*element.window.getScale() - element.window.layout.getScrollY())/element.window.getScale()) + 100;
+                        chestData.anim.pos1.x = element.window.location.windowToGlobal(Math.floor(chestData.anim.pos1.pre_x/250)*250 + 125) + element.window.location.x;
+                        chestData.anim.pos1.y = element.window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*element.window.getScale() - scrollY)/element.window.getScale()) + element.window.location.y;
                     }
-                    startAnim(element.window.getParentWindow().getWindow('overlay'), chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                    var overlayWindow = element.window.getParentWindow().getWindow('overlay');
+                    startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                    var _pos2 = {
+                        x: chestData.anim.pos2.x,
+                        y: chestData.anim.pos2.y
+                    };
+                    chestData.anim.pos2 = chestData.anim.pos1;
+                    chestData.anim.pos1 = _pos2;
+                    var item2 = chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot);
+                    if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item);
                     uiAdapter.getElement("scale2").setPosition(-100, -100);
                     chestData.container.setScale('scale2', 0);
                     uiAdapter.getElement("scale1").setPosition(-100, -100);
@@ -394,7 +455,7 @@ var CustomChest = {
                     if(item.id == 0 || chestData.selectedSlot != null)return;
                     chestData.item = {
                         maxCount: item.count,
-                        count: 0
+                        count: 1
                     }
                     chestData.start = World.getThreadTime() + 10;
                     chestData.tickStarted = false;
@@ -460,8 +521,8 @@ var ChestTileEntity = /** @class */ (function () {
             }
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
-            this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             this.container.setSlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             slot1.validate();
             this.container.sendChanges();
         },
@@ -491,26 +552,41 @@ var ChestTileEntity = /** @class */ (function () {
             }
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
-            this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             player.setInventorySlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             slot1.validate();
             this.container.sendChanges();
         },
-    };
-    ChestTileEntity.prototype.client = {
-        tick: function(){
-            if(chestData.start && World.getThreadTime() >= chestData.start && chestData.item.count < chestData.item.maxCount){
-                if(World.getThreadTime() == chestData.start){
-                    var uiAdapter = chestData.container.getUiAdapter();
-                    uiAdapter.getElement(chestData.barData.name).setPosition(chestData.barData.x, chestData.barData.y);
-                }
-                chestData.tickStarted = true;
-                chestData.item.count += chestData.item.maxCount/25;
-                chestData.container.setScale(chestData.barData.name, chestData.item.maxCount > 15 ? chestData.item.count/chestData.item.maxCount : Math.round(chestData.item.count)/chestData.item.maxCount);
+        InventorySlotToContainerSlot: function(eventData, connectedClient) {
+            var player = new PlayerActor(connectedClient.getPlayerUid());
+            var slot1 = player.getInventorySlot(eventData.slot1);
+            var slot2 = this.container.getSlot(eventData.slot2);
+            if(slot2.id != slot1.id && slot2.id != 0){
+                player.setInventorySlot(eventData.slot1, slot2.id, slot2.count, slot2.data, slot2.extra);
+                this.container.setSlot(eventData.slot2, slot1.id, slot1.count, slot1.data, slot1.extra);
+                this.container.sendChanges();
+                return;
             }
-        }
+            var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
+            if(_count == 0) return;
+            player.setInventorySlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
+            this.container.setSlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            slot2.validate();
+            this.container.sendChanges();
+        },
     };
     return ChestTileEntity;
 }());
+Callback.addCallback('LocalTick', function(){
+    if(chestData.start && World.getThreadTime() >= chestData.start && chestData.item.count < chestData.item.maxCount){
+        if(World.getThreadTime() == chestData.start){
+            var uiAdapter = chestData.container.getUiAdapter();
+            uiAdapter.getElement(chestData.barData.name).setPosition(chestData.barData.x, chestData.barData.y);
+        }
+        chestData.tickStarted = true;
+        chestData.item.count += chestData.item.maxCount/25;
+        chestData.container.setScale(chestData.barData.name, chestData.item.maxCount > 15 ? chestData.item.count/chestData.item.maxCount : Math.floor(chestData.item.count)/chestData.item.maxCount);
+    }
+});
 EXPORT("CustomChest", CustomChest);
 EXPORT("ChestTileEntity", ChestTileEntity);
