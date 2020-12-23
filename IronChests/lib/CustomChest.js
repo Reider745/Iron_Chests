@@ -534,7 +534,7 @@ var ChestTileEntity = /** @class */ (function () {
             }
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
-            this.container.setSlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            this.container.setSlot(eventData.slot2, slot1.id, slot2.id != 0 ? slot2.count + _count : _count, slot1.data, slot1.extra);
             this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             slot1.validate();
             this.container.sendChanges();
@@ -551,7 +551,7 @@ var ChestTileEntity = /** @class */ (function () {
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
             player.setInventorySlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
-            player.setInventorySlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            player.setInventorySlot(eventData.slot2, slot1.id, slot2.id != 0 ? slot2.count + _count : _count, slot1.data, slot1.extra);
         },
         SlotToInventorySlot: function(eventData, connectedClient) {
             var player = new PlayerActor(connectedClient.getPlayerUid());
@@ -565,7 +565,7 @@ var ChestTileEntity = /** @class */ (function () {
             }
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
-            player.setInventorySlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            player.setInventorySlot(eventData.slot2, slot1.id, slot2.id != 0 ? slot2.count + _count : _count, slot1.data, slot1.extra);
             this.container.setSlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
             slot1.validate();
             this.container.sendChanges();
@@ -583,7 +583,7 @@ var ChestTileEntity = /** @class */ (function () {
             var _count = slot2.id != 0 ? Math.min(eventData.count, Item.getMaxStack(slot2.id) - slot2.count) : eventData.count;
             if(_count == 0) return;
             player.setInventorySlot(eventData.slot1, slot1.id, slot1.count - _count, slot1.data, slot1.extra);
-            this.container.setSlot(eventData.slot2, slot1.id, slot2.count + _count, slot1.data, slot1.extra);
+            this.container.setSlot(eventData.slot2, slot1.id, slot2.id != 0 ? slot2.count + _count : _count, slot1.data, slot1.extra);
             slot2.validate();
             this.container.sendChanges();
         },
