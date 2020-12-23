@@ -36,6 +36,7 @@ function defaultChestData(){
             x: 0,
             y: 0
         },
+        pre_selectedSlot: null,
         selectedSlot: null,
         selectedSlotType: null,
         lastClickTime: 0,
@@ -254,6 +255,9 @@ var CustomChest = {
                         chestData.selectedSlotType = null;
                         return;
                     }
+                    if(event.type == 'CANCEL'){
+                        event_type = 'UP';
+                    }
                     if(event.type == 'CLICK')event_type = 'UP';
                     if(event_type == 'DOWN'){
                         if(item.id == 0 || chestData.selectedSlot != null)return;
@@ -261,6 +265,7 @@ var CustomChest = {
                             maxCount: item.count,
                             count: 1
                         }
+                        chestData.pre_selectedSlot = slot_id;
                         chestData.start = World.getThreadTime() + 10;
                         chestData.tickStarted = false;
                         chestData.barData = {
@@ -282,6 +287,7 @@ var CustomChest = {
                         chestData.start = false;
                         chestData.selectedSlot = slot_id;
                         chestData.selectedSlotType = 1;
+                        chestData.pre_selectedSlot = null;
                         if(!chestData.tickStarted) chestData.item.count = chestData.item.maxCount;
                     }
                 }
@@ -450,6 +456,10 @@ var CustomChest = {
                     uiAdapter.getElement("selection2").setPosition(-1000, -1000);
                     chestData.selectedSlot = null;
                     chestData.selectedSlotType = null;
+                    return;
+                }
+                if(event.type == 'CANCEL' || (event.type == 'MOVE' && chestData.pre_selectedSlot && chestData.pre_selectedSlot != slot_id)){
+                    event_type = 'UP';
                 }
                 if(event.type == 'CLICK')event_type = 'UP';
                 if(event_type == 'DOWN'){
@@ -458,6 +468,7 @@ var CustomChest = {
                         maxCount: item.count,
                         count: 1
                     }
+                    chestData.pre_selectedSlot = slot_id;
                     chestData.start = World.getThreadTime() + 10;
                     chestData.tickStarted = false;
                     chestData.barData = {
@@ -478,6 +489,7 @@ var CustomChest = {
                     chestData.start = false;
                     chestData.selectedSlot = slot_id;
                     chestData.selectedSlotType = 0;
+                    chestData.pre_selectedSlot = null;
                     if(!chestData.tickStarted) chestData.item.count = chestData.item.maxCount;
                 }
             }
