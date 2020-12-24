@@ -54,7 +54,7 @@ function defaultChestData(){
         }
     }
 }
-function startAnim(window, slot){
+function startAnim(window, slot, size){
     var content = window.getContent();
     var slot_id = '$slot' + parseInt(Math.random()*10000000);
     var pos1 = {x: chestData.anim.pos1.x, y: chestData.anim.pos1.y};
@@ -63,7 +63,7 @@ function startAnim(window, slot){
         type: "slot", 
         x: pos1.x - 75/2, 
         y: pos1.y - 75/2, 
-        size: 75, 
+        size: (size || 70), 
         bitmap: "_default_slot_empty",
         visual: true
     };
@@ -182,7 +182,7 @@ var CustomChest = {
                                             x: contentWindow.location.windowToGlobal(_elements_[i].x + _elements_[i].size/2) + contentWindow.location.x,
                                             y: contentWindow.location.windowToGlobal((_elements_[i].y + _elements_[i].size/2) - scrollY/contentWindow.getScale()) + contentWindow.location.y
                                         }
-                                        startAnim(overlayWindow, chestData.container.getSlot(i));
+                                        startAnim(overlayWindow, chestData.container.getSlot(i), element.window.location.windowToGlobal(this.size));
                                         if(needCount <= 0) break;
                                     }
                                     if(needCount > 0){
@@ -199,7 +199,7 @@ var CustomChest = {
                                                 x: inventoryWindow.location.windowToGlobal(_elements['__invSlot' + i].x + 125) + inventoryWindow.location.x,
                                                 y: inventoryWindow.location.windowToGlobal(((_elements['__invSlot' + i].y + 125)*inventoryWindow.getScale() - _scrollY)/inventoryWindow.getScale()) + inventoryWindow.location.y
                                             }
-                                            startAnim(overlayWindow, Player.getInventorySlot(i));
+                                            startAnim(overlayWindow, Player.getInventorySlot(i), element.window.location.windowToGlobal(this.size));
                                             if(needCount <= 0) break;
                                         }
                                     }
@@ -236,7 +236,7 @@ var CustomChest = {
                             chestData.anim.pos1.y = __window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*__window.getScale() - _scrollY)/__window.getScale()) + __window.location.y;
                         }
                         var overlayWindow = element.window.getParentWindow().getWindow('overlay');
-                        startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                        startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot), element.window.location.windowToGlobal(this.size));
                         var _pos2 = {
                             x: chestData.anim.pos2.x,
                             y: chestData.anim.pos2.y
@@ -244,7 +244,7 @@ var CustomChest = {
                         chestData.anim.pos2 = chestData.anim.pos1;
                         chestData.anim.pos1 = _pos2;
                         var item2 = chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot);
-                        if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item);
+                        if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item,chestData.selectedSlotType ? element.window.location.windowToGlobal(this.size) : chestData.anim.pos2.window.location.windowToGlobal(251));
                         uiAdapter.getElement("scale2").setPosition(-100, -100);
                         chestData.container.setScale('scale2', 0);
                         uiAdapter.getElement("scale1").setPosition(-100, -100);
@@ -277,7 +277,7 @@ var CustomChest = {
                         chestData.lastClickTime = java.lang.System.currentTimeMillis();
                         chestData.anim.pos1 = {
                             window: element.window,
-                            slotSize: slotSize,
+                            slotSize: this.size,
                             pre_x: this.x,
                             pre_y: this.y
                         }
@@ -383,7 +383,7 @@ var CustomChest = {
                                         x: inventoryWindow.location.windowToGlobal(_elements['__invSlot' + i].x + 125) + inventoryWindow.location.x,
                                         y: inventoryWindow.location.windowToGlobal(((_elements['__invSlot' + i].y + 125)*inventoryWindow.getScale() - _scrollY)/inventoryWindow.getScale()) + inventoryWindow.location.y
                                     }
-                                    startAnim(overlayWindow, Player.getInventorySlot(i));
+                                    startAnim(overlayWindow, Player.getInventorySlot(i), element.window.location.windowToGlobal(251));
                                     if(needCount <= 0) break;
                                 }
                                 if(needCount > 0){
@@ -403,7 +403,7 @@ var CustomChest = {
                                             x: contentWindow.location.windowToGlobal(_elements_[i].x + _elements_[i].size/2) + contentWindow.location.x,
                                             y: contentWindow.location.windowToGlobal((_elements_[i].y + _elements_[i].size/2) - scrollY/contentWindow.getScale()) + contentWindow.location.y
                                         }
-                                        startAnim(overlayWindow, chestData.container.getSlot(i));
+                                        startAnim(overlayWindow, chestData.container.getSlot(i), element.window.location.windowToGlobal(251));
                                         if(needCount <= 0) break;
                                     }
                                 }
@@ -439,7 +439,7 @@ var CustomChest = {
                         chestData.anim.pos1.y = element.window.location.windowToGlobal(((Math.floor(chestData.anim.pos1.pre_y/250)*250 + 125)*element.window.getScale() - scrollY)/element.window.getScale()) + element.window.location.y;
                     }
                     var overlayWindow = element.window.getParentWindow().getWindow('overlay');
-                    startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot));
+                    startAnim(overlayWindow, chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot), element.window.location.windowToGlobal(251));
                     var _pos2 = {
                         x: chestData.anim.pos2.x,
                         y: chestData.anim.pos2.y
@@ -447,7 +447,7 @@ var CustomChest = {
                     chestData.anim.pos2 = chestData.anim.pos1;
                     chestData.anim.pos1 = _pos2;
                     var item2 = chestData.selectedSlotType ? chestData.container.getSlot(chestData.selectedSlot) : Player.getInventorySlot(chestData.selectedSlot);
-                    if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item);
+                    if(item2.id != 0 && (item2.id != item.id || item2.count > Item.getMaxStack(item.id) - item.count))startAnim(overlayWindow, item, chestData.selectedSlotType ? chestData.anim.pos2.window.location.windowToGlobal(chestData.anim.pos2.slotSize) : element.window.location.windowToGlobal(251));
                     uiAdapter.getElement("scale2").setPosition(-100, -100);
                     chestData.container.setScale('scale2', 0);
                     uiAdapter.getElement("scale1").setPosition(-100, -100);
