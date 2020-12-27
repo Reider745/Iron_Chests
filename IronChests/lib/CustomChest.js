@@ -1,6 +1,6 @@
 LIBRARY({
     name: "CustomChest",
-    version: 1,
+    version: 2,
     shared: false,
     api: "CoreEngine"
 });
@@ -141,12 +141,12 @@ var CustomChest = {
             z: 9,
             bitmap: "_selection",
             width: slotSize,
-            height: slotSize 
+            height: slotSize
         }
         for (var i = 0; i < count; i++) {
             var x = i % inRow;
             var y = Math.floor(i / inRow);
-            elements["slot" + i] = { 
+            elements["slot" + i] = {
                 type: "slot", i: i, x: startX + x * slotSize, y: y * slotSize, size: slotSize, visual: true,
                 onTouchEvent: function(element, event){
                     var slot_id = 'slot' + this.i;
@@ -309,12 +309,12 @@ var CustomChest = {
             elements: elements
         });
         var window2 = window.addWindow('overlay', {
-            location: { 
-                x: 0, 
-                y: 0, 
-                width: 1000, 
+            location: {
+                x: 0,
+                y: 0,
+                width: 1000,
                 height: UI.getScreenHeight()
-            }, 
+            },
             drawing: [{type: 'color', color: android.graphics.Color.TRANSPARENT}],
             elements: {
 
