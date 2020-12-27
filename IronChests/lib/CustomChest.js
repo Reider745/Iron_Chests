@@ -60,10 +60,10 @@ function startAnim(window, slot, size){
     var pos1 = {x: chestData.anim.pos1.x, y: chestData.anim.pos1.y};
     var pos2 = {x: chestData.anim.pos2.x, y: chestData.anim.pos2.y};
     content.elements[slot_id] = {
-        type: "slot", 
-        x: pos1.x - 75/2, 
-        y: pos1.y - 75/2, 
-        size: (size || 70), 
+        type: "slot",
+        x: pos1.x - 75/2,
+        y: pos1.y - 75/2,
+        size: size || 70,
         bitmap: "_default_slot_empty",
         visual: true
     };
