@@ -353,7 +353,7 @@ var CustomChest = {
             bitmap: "_default_slot_empty",
             scale: 1,
             onTouchEvent: function(element, event){
-                var slot_id = Math.floor(event.x/251)+Math.floor(event.y/251)*4;
+                var slot_id = Math.floor(event.x/251)+Math.floor(event.y/250)*4;
                 var item = Player.getInventorySlot(slot_id);
                 var uiAdapter = chestData.container.getUiAdapter();
                 event_type = event.type;
@@ -494,6 +494,7 @@ var CustomChest = {
                 }
             }
         }
+        window.refreshAll();
         return window;
     }
 };
